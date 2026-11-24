@@ -309,33 +309,6 @@
       gap: 8px;
     }
 
-    /* Chips rápidos */
-    .quick-chips {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-      margin-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .quick-chips::-webkit-scrollbar { display: none; }
-
-    .chip {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 11px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .chip:active {
-      background: var(--var-soft);
-      border-color: var(--var);
-    }
-
     .field-group { margin-bottom: 12px; }
 
     .field-row {
@@ -367,16 +340,19 @@
 
     .input:focus { border-color: var(--text); }
 
-    /* Selector de Subcategoría Puntual (3 columnas: Súper, Ocio, Varios) */
+    /* Selector unificado de categoría puntual */
     .tag-selector {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
       margin-bottom: 14px;
     }
 
     .tag-btn {
+      flex: 1 1 auto;
+      min-width: 64px;
       height: 38px;
+      padding: 0 10px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
@@ -406,13 +382,9 @@
     .btn-fixed { background: var(--fixed); color: #fff; }
     .btn-variable { background: var(--var); color: #0b0f19; }
 
-    /* Cabecera de lista + filtros */
+    /* Cabecera de lista + filtros idénticos */
     .list-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       margin-bottom: 10px;
-      gap: 8px;
     }
 
     .list-header {
@@ -421,20 +393,22 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
+      margin-bottom: 8px;
     }
 
     .filter-pills {
       display: flex;
-      gap: 5px;
+      gap: 6px;
       overflow-x: auto;
+      padding-bottom: 2px;
       scrollbar-width: none;
     }
     .filter-pills::-webkit-scrollbar { display: none; }
 
     .f-pill {
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 999px;
-      font-size: 0.74rem;
+      font-size: 0.78rem;
       font-weight: 600;
       border: 1px solid var(--border);
       background: var(--surface);
@@ -619,7 +593,6 @@
       cursor: pointer;
     }
 
-    /* Botones de ajuste rápido dentro del sheet de presupuesto */
     .budget-stepper {
       display: grid;
       grid-template-columns: 1fr 2fr 1fr;
@@ -706,7 +679,7 @@
     </div>
   </section>
 
-  <!-- Barra de Presupuesto Puntuales (tocar para abrir sheet) -->
+  <!-- Barra de Presupuesto Puntuales -->
   <section class="budget-bar-card" id="budgetCard">
     <div class="budget-top">
       <span class="budget-label">Presupuesto puntuales</span>
@@ -730,12 +703,9 @@
         <span class="dot variable"></span> Añadir gasto puntual
       </div>
 
-      <!-- Chips de conceptos frecuentes -->
-      <div class="quick-chips" id="quickChips"></div>
-
       <div class="field-group">
         <label class="field-label" for="punConcepto">Concepto</label>
-        <input class="input" type="text" id="punConcepto" placeholder="Ej. Mercadona, Café, Farmacia..." required />
+        <input class="input" type="text" id="punConcepto" placeholder="Ej. Compra semanal, Cena, Bombillas..." required />
       </div>
 
       <div class="field-row">
@@ -749,24 +719,15 @@
         </div>
       </div>
 
-      <label class="field-label">Etiqueta</label>
-      <div class="tag-selector" id="punTags">
-        <button type="button" class="tag-btn selected" data-tag="Súper">Súper</button>
-        <button type="button" class="tag-btn" data-tag="Ocio">Ocio</button>
-        <button type="button" class="tag-btn" data-tag="Varios">Varios</button>
-      </div>
+      <label class="field-label">Categoría</label>
+      <div class="tag-selector" id="punTags"></div>
 
       <button type="submit" class="btn-submit btn-variable">Guardar gasto puntual</button>
     </form>
 
     <div class="list-top">
       <div class="list-header">Historial</div>
-      <div class="filter-pills" id="filterPills">
-        <button type="button" class="f-pill active" data-filter="Todos">Todos</button>
-        <button type="button" class="f-pill" data-filter="Súper">Súper</button>
-        <button type="button" class="f-pill" data-filter="Ocio">Ocio</button>
-        <button type="button" class="f-pill" data-filter="Varios">Varios</button>
-      </div>
+      <div class="filter-pills" id="filterPills"></div>
     </div>
     <div id="listPuntuales" class="item-list"></div>
   </section>
@@ -852,12 +813,8 @@
       </div>
     </div>
     <div class="field-group">
-      <label class="field-label">Etiqueta</label>
-      <select class="input" id="editPunCategoria">
-        <option value="Súper">Súper</option>
-        <option value="Ocio">Ocio</option>
-        <option value="Varios">Varios</option>
-      </select>
+      <label class="field-label">Categoría</label>
+      <select class="input" id="editPunCategoria"></select>
     </div>
     <div class="sheet-actions">
       <button type="button" class="btn-delete-sheet" id="btnDelPunModal">Borrar</button>
@@ -909,8 +866,11 @@
 <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbzRkndI7vLONGGWdUHKdirdNr48v0eYiFcp6YbHYyZ_pKhpzTLmYtwMgRPH3cDDWdAwSA/exec';
 
+  // Única fuente de verdad para formulario, filtros e historial
+  const CATEGORIAS_PUNTUALES = ['Súper', 'Ocio', 'Casa', 'Salud', 'Varios'];
+
   let state = { fijos: [], puntuales: [] };
-  let selectedTag = 'Súper';
+  let selectedTag = CATEGORIAS_PUNTUALES[0];
   let activeFilter = 'Todos';
   let monthlyBudget = Number(localStorage.getItem('gastos_budget')) || 400;
 
@@ -918,6 +878,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     generateAppIcon();
+    renderCategoryControls();
 
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -931,6 +892,21 @@
     handleUrlShortcuts();
     loadData();
   });
+
+  // Rellena con exactamente las mismas categorías el formulario, el filtro y el modal de edición
+  function renderCategoryControls() {
+    $('punTags').innerHTML = CATEGORIAS_PUNTUALES.map((cat, idx) =>
+      `<button type="button" class="tag-btn ${idx === 0 ? 'selected' : ''}" data-tag="${cat}">${cat}</button>`
+    ).join('');
+
+    $('filterPills').innerHTML = ['Todos', ...CATEGORIAS_PUNTUALES].map((cat, idx) =>
+      `<button type="button" class="f-pill ${idx === 0 ? 'active' : ''}" data-filter="${cat}">${cat}</button>`
+    ).join('');
+
+    $('editPunCategoria').innerHTML = CATEGORIAS_PUNTUALES.map(cat =>
+      `<option value="${cat}">${cat}</option>`
+    ).join('');
+  }
 
   function generateAppIcon() {
     try {
@@ -967,7 +943,7 @@
       if (concepto) $('punConcepto').value = concepto;
       if (importe) $('punImporte').value = parseFloat(importe.replace(',', '.')) || '';
       if (fecha) $('punFecha').value = fecha;
-      if (categoria && ['Súper', 'Ocio', 'Varios'].includes(categoria)) {
+      if (categoria && CATEGORIAS_PUNTUALES.includes(categoria)) {
         selectedTag = categoria;
         document.querySelectorAll('#punTags .tag-btn').forEach(b => {
           b.classList.toggle('selected', b.dataset.tag === categoria);
@@ -1031,7 +1007,7 @@
       }
     });
 
-    // Etiquetas rápidas en formulario puntual
+    // Selección de categoría en formulario puntual
     document.querySelectorAll('#punTags .tag-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#punTags .tag-btn').forEach(b => b.classList.remove('selected'));
@@ -1228,39 +1204,8 @@
     $('budgetFill').style.width = `${pct}%`;
     $('budgetFill').style.backgroundColor = pct >= 100 ? 'var(--danger)' : (pct >= 80 ? 'var(--var)' : 'var(--paid)');
 
-    renderQuickChips();
     renderPuntuales();
     renderFijos();
-  }
-
-  function renderQuickChips() {
-    const counts = {};
-    state.puntuales.forEach(p => {
-      const key = p.concepto.trim();
-      if (key) counts[key] = (counts[key] || 0) + 1;
-    });
-
-    const top = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(e => e[0]);
-
-    const defaults = ['Mercadona', 'Lidl', 'Farmacia', 'Café'];
-    defaults.forEach(d => {
-      if (top.length < 5 && !top.some(x => x.toLowerCase() === d.toLowerCase())) {
-        top.push(d);
-      }
-    });
-
-    const box = $('quickChips');
-    box.innerHTML = top.map(name => `<button type="button" class="chip" data-chip="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('');
-
-    box.querySelectorAll('.chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        $('punConcepto').value = btn.dataset.chip;
-        $('punImporte').focus();
-      });
-    });
   }
 
   function renderPuntuales() {
@@ -1348,7 +1293,7 @@
     $('editPunConcepto').value = item.concepto;
     $('editPunImporte').value = item.importe;
     $('editPunFecha').value = item.fecha;
-    $('editPunCategoria').value = ['Súper', 'Ocio', 'Varios'].includes(item.categoria) ? item.categoria : 'Varios';
+    $('editPunCategoria').value = CATEGORIAS_PUNTUALES.includes(item.categoria) ? item.categoria : 'Varios';
     $('editPuntualModal').classList.remove('hidden');
   }
 
