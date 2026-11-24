@@ -2,227 +2,330 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f19" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Control de Gastos</title>
+  <meta name="apple-mobile-web-app-title" content="Gastos" />
+  <title>Mis Gastos</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface-2: #334155;
-      --border: #334155;
+      --bg: #0b0f19;
+      --surface: #131926;
+      --surface-elevated: #1c2436;
+      --border: #252f44;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --primary-dark: #0284c7;
-      --success: #22c55e;
-      --warning: #f59e0b;
+
+      /* Color Gastos Fijos: Índigo */
+      --fixed: #6366f1;
+      --fixed-soft: rgba(99, 102, 241, 0.14);
+      --fixed-border: rgba(99, 102, 241, 0.38);
+
+      /* Color Gastos Puntuales: Ámbar */
+      --var: #f59e0b;
+      --var-soft: rgba(245, 158, 11, 0.14);
+      --var-border: rgba(245, 158, 11, 0.38);
+
+      /* Estado Pagado / Peligro */
+      --paid: #22c55e;
+      --paid-soft: rgba(34, 197, 94, 0.14);
       --danger: #ef4444;
-      --radius: 14px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding-bottom: 40px;
-      line-height: 1.45;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      min-height: 100dvh;
     }
 
-    .container {
-      max-width: 760px;
+    /* Optimizado para iPhone 15 Pro (393px) y centrado en pantallas mayores */
+    .app {
+      width: 100%;
+      max-width: 430px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 0 16px;
     }
 
-    header {
+    /* Cabecera */
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 16px;
       gap: 10px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
     }
 
-    h1 {
-      font-size: 1.35rem;
+    .app-title {
+      font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
 
-    .header-controls {
+    .month-control {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    input[type="month"], input[type="text"], input[type="number"], input[type="date"], select {
+    input[type="month"] {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 0.95rem;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 15px;
+      font-weight: 600;
+      height: 40px;
       outline: none;
     }
 
-    input:focus, select:focus {
-      border-color: var(--primary);
-    }
-
-    .btn-icon {
+    .btn-refresh {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      cursor: pointer;
+      font-size: 1.15rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 560px) {
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-    }
-
-    .stat-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-
-    .stat-value {
-      font-size: 1.45rem;
-      font-weight: 700;
-    }
-
-    .stat-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: var(--surface);
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 18px;
-      border: 1px solid var(--border);
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 10px;
-      border-radius: 9px;
-      font-weight: 600;
-      font-size: 0.95rem;
       cursor: pointer;
-      transition: 0.15s;
     }
 
-    .tab-btn.active {
-      background: var(--primary-dark);
-      color: #fff;
-    }
-
-    .card {
+    /* Resumen Total + Desglose por Color */
+    .hero-total {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 1.05rem;
-      font-weight: 600;
+      border-radius: 18px;
+      padding: 16px 18px;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .form-grid {
+    .hero-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .hero-amount {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .sync-dot {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .split-cards {
       display: grid;
-      grid-template-columns: 2fr 1.2fr 1fr auto;
-      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
-    @media (max-width: 640px) {
-      .form-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .form-grid .full-mobile {
-        grid-column: span 2;
-      }
+    .mini-card {
+      border-radius: 16px;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
     }
 
-    .btn {
-      background: var(--primary-dark);
-      color: #fff;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: inline-flex;
+    .mini-card.fixed {
+      background: var(--fixed-soft);
+      border-color: var(--fixed-border);
+    }
+
+    .mini-card.variable {
+      background: var(--var-soft);
+      border-color: var(--var-border);
+    }
+
+    .mini-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 6px;
+    }
+
+    .mini-card.fixed .mini-title { color: #a5b4fc; }
+    .mini-card.variable .mini-title { color: #fcd34d; }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.fixed { background: var(--fixed); }
+    .dot.variable { background: var(--var); }
+
+    .mini-amount {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .mini-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Selector de Vista (Segmented Control estilo iOS) */
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 18px;
+      gap: 4px;
+    }
+
+    .seg-btn {
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .seg-btn.active-fixed {
+      background: var(--fixed);
+      color: #fff;
+    }
+
+    .seg-btn.active-variable {
+      background: var(--var);
+      color: #0b0f19;
+      font-weight: 700;
+    }
+
+    /* Formulario Claro y Espaciado */
+    .form-card {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+    }
+
+    .form-card.fixed-theme {
+      border-top: 3px solid var(--fixed);
+    }
+
+    .form-card.variable-theme {
+      border-top: 3px solid var(--var);
+    }
+
+    .section-heading {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
       gap: 8px;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    /* 16px obligatorio en iOS para evitar auto-zoom al enfocar */
+    .input {
+      width: 100%;
+      height: 46px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 12px;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .input:focus {
+      border-color: var(--text);
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 13px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
       transition: opacity 0.15s;
     }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-submit:active {
+      opacity: 0.8;
     }
 
-    .btn-scanner {
-      width: 100%;
-      padding: 15px;
-      font-size: 1.05rem;
-      background: linear-gradient(135deg, #0284c7, #2563eb);
-      margin-bottom: 14px;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    .btn-fixed {
+      background: var(--fixed);
+      color: #fff;
     }
 
-    .btn-success { background: #16a34a; }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); padding: 6px 10px; font-size: 0.85rem; }
-    .btn-ghost { background: var(--surface-2); color: var(--text); }
+    .btn-variable {
+      background: var(--var);
+      color: #0b0f19;
+    }
+
+    /* Listado de Movimientos */
+    .list-header {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
 
     .item-list {
       display: flex;
@@ -230,304 +333,247 @@
       gap: 10px;
     }
 
-    .expense-item {
-      background: rgba(15, 23, 42, 0.55);
+    .expense-row {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-    }
-
-    .expense-main {
+      border-radius: 15px;
+      padding: 13px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
     }
 
-    .expense-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
+    .expense-row.fixed-row {
+      border-left: 4px solid var(--fixed);
     }
 
-    .expense-title {
+    .expense-row.variable-row {
+      border-left: 4px solid var(--var);
+    }
+
+    .row-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .row-title {
+      font-size: 0.98rem;
       font-weight: 600;
-      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .row-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .pill-fixed {
+      background: var(--fixed-soft);
+      color: #a5b4fc;
+    }
+
+    .row-right {
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
-    .badge {
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-weight: 600;
-      background: var(--surface-2);
-      color: var(--primary);
-    }
-
-    .badge-ia {
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-    }
-
-    .expense-meta {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    .expense-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .amount {
+    .row-amount {
+      font-size: 1.02rem;
       font-weight: 700;
-      font-size: 1.05rem;
       white-space: nowrap;
     }
 
-    .pay-toggle {
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
+    .status-btn {
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
       border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--warning);
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      cursor: pointer;
     }
 
-    .pay-toggle.paid {
-      background: rgba(34, 197, 94, 0.15);
+    .status-btn.is-paid {
+      background: var(--paid-soft);
       border-color: rgba(34, 197, 94, 0.4);
-      color: var(--success);
+      color: var(--paid);
     }
 
-    .ticket-details {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--border);
-      display: none;
-    }
-
-    .ticket-details.open {
-      display: block;
-    }
-
-    .ticket-line {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      padding: 3px 0;
-      color: #cbd5e1;
-    }
-
-    .review-box {
-      border: 1px solid var(--primary);
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .product-edit-row {
-      display: grid;
-      grid-template-columns: 2.5fr 0.7fr 1fr auto;
-      gap: 6px;
-      margin-bottom: 8px;
+    .del-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      border: none;
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
     }
 
-    .product-edit-row input {
-      padding: 7px 9px;
+    .empty-msg {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--text-muted);
       font-size: 0.88rem;
-      width: 100%;
+      background: var(--surface);
+      border-radius: 15px;
+      border: 1px dashed var(--border);
     }
 
     .hidden { display: none !important; }
 
-    .loader-bar {
-      text-align: center;
-      padding: 14px;
-      color: var(--primary);
-      font-weight: 600;
-      font-size: 0.92rem;
-    }
-
     .toast {
       position: fixed;
-      bottom: 20px;
+      bottom: max(24px, env(safe-area-inset-bottom));
       left: 50%;
       transform: translateX(-50%);
-      background: #1e293b;
-      border: 1px solid var(--primary);
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 14px;
-      font-size: 0.88rem;
-      max-width: 92vw;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.55);
-      z-index: 999;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 100;
-    }
-
-    .modal-card {
-      background: var(--surface);
+      background: var(--surface-elevated);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      width: 100%;
-      max-width: 480px;
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      z-index: 99;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <h1>Control de Gastos</h1>
-    <div class="header-controls">
-      <input type="month" id="monthPicker" />
-      <button class="btn-icon" id="btnRefresh" title="Recargar datos">&#x21bb;</button>
-      <button class="btn-icon" id="btnSettings" title="Configurar URL Script">&#9881;</button>
+<main class="app">
+  <!-- Cabecera -->
+  <header class="top-bar">
+    <h1 class="app-title">Gastos</h1>
+    <div class="month-control">
+      <input type="month" id="monthPicker" aria-label="Seleccionar mes" />
+      <button class="btn-refresh" id="btnRefresh" title="Actualizar">&#x21bb;</button>
     </div>
   </header>
 
-  <div class="summary-grid">
-    <div class="stat-card">
-      <div class="stat-label">Gastos Fijos</div>
-      <div class="stat-value" id="totalFijos">0,00 €</div>
-      <div class="stat-sub" id="subFijos">Pagado: 0,00 € | Pend.: 0,00 €</div>
+  <!-- Total General -->
+  <section class="hero-total">
+    <div>
+      <div class="hero-label">Total del mes</div>
+      <div class="hero-amount" id="totalMes">0,00 €</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Gastos Puntuales</div>
-      <div class="stat-value" id="totalPuntuales">0,00 €</div>
-      <div class="stat-sub" id="subPuntuales">0 movimientos</div>
+    <div class="sync-dot" id="syncStatus">Al día</div>
+  </section>
+
+  <!-- Tarjetas Diferenciadas por Color -->
+  <section class="split-cards">
+    <div class="mini-card fixed">
+      <div class="mini-title"><span class="dot fixed"></span> Fijos</div>
+      <div class="mini-amount" id="totalFijos">0,00 €</div>
+      <div class="mini-sub" id="subFijos">Pagado: 0,00 €</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Total del Mes</div>
-      <div class="stat-value" style="color: var(--primary);" id="totalMes">0,00 €</div>
-      <div class="stat-sub">Fijos + Puntuales</div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="puntuales">Gastos Puntuales y Tickets</button>
-    <button class="tab-btn" data-tab="fijos">Gastos Fijos Mensuales</button>
-  </div>
-
-  <div id="loadingIndicator" class="loader-bar hidden">Sincronizando con Google Sheets...</div>
-
-  <section id="section-puntuales">
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
-    <button class="btn btn-scanner" id="btnScanTicket">
-      Escanear Ticket con Cámara (IA)
-    </button>
-
-    <div id="ticketReviewCard" class="card review-box hidden">
-      <div class="card-title">
-        <span>Revisar Ticket Detectado</span>
-        <button class="btn btn-danger" id="btnCancelReview">Cancelar</button>
-      </div>
-
-      <div class="form-grid" style="grid-template-columns: 1.5fr 1fr 1fr; margin-bottom: 12px;">
-        <div>
-          <label class="stat-label">Supermercado</label>
-          <input type="text" id="revSupermercado" style="width:100%" />
-        </div>
-        <div>
-          <label class="stat-label">Fecha</label>
-          <input type="date" id="revFecha" style="width:100%" />
-        </div>
-        <div>
-          <label class="stat-label">Total Ticket (€)</label>
-          <input type="number" step="0.01" id="revTotal" style="width:100%" />
-        </div>
-      </div>
-
-      <div id="revMismatchAlert" class="hidden" style="color: var(--warning); font-size: 0.85rem; margin-bottom: 10px;"></div>
-
-      <div class="stat-label" style="margin-bottom: 6px;">Desglose de productos (editable)</div>
-      <div id="revProductsList"></div>
-
-      <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
-        <button class="btn btn-ghost" id="btnAddProductRow">+ Añadir línea</button>
-        <button class="btn btn-success" id="btnSaveTicket">Confirmar y Guardar Ticket</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Añadir gasto puntual manual</div>
-      <form id="formManual" class="form-grid">
-        <input type="text" id="manConcepto" placeholder="Concepto (ej. Cafetería, Farmacia)" required class="full-mobile" />
-        <input type="date" id="manFecha" required />
-        <input type="number" step="0.01" min="0.01" id="manImporte" placeholder="Importe (€)" required />
-        <button type="submit" class="btn">Guardar</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Historial del mes</div>
-      <div id="listPuntuales" class="item-list"></div>
+    <div class="mini-card variable">
+      <div class="mini-title"><span class="dot variable"></span> Puntuales</div>
+      <div class="mini-amount" id="totalPuntuales">0,00 €</div>
+      <div class="mini-sub" id="subPuntuales">0 apuntes</div>
     </div>
   </section>
 
-  <section id="section-fijos" class="hidden">
-    <div class="card">
-      <div class="card-title">Nuevo gasto fijo mensual</div>
-      <form id="formFijo" class="form-grid">
-        <input type="text" id="fixConcepto" placeholder="Concepto (ej. Alquiler piso)" required class="full-mobile" />
-        <select id="fixCategoria">
-          <option value="Alquiler">Alquiler</option>
-          <option value="Luz">Luz</option>
-          <option value="Internet">Internet</option>
-        </select>
-        <input type="number" step="0.01" min="0.01" id="fixImporte" placeholder="Importe (€)" required />
-        <button type="submit" class="btn">Añadir</button>
-      </form>
-    </div>
+  <!-- Selector de Sección -->
+  <nav class="segmented">
+    <button type="button" class="seg-btn active-variable" id="tabPuntuales">Gastos Puntuales</button>
+    <button type="button" class="seg-btn" id="tabFijos">Gastos Fijos</button>
+  </nav>
 
-    <div class="card">
-      <div class="card-title">Recibos fijos mensuales</div>
-      <div id="listFijos" class="item-list"></div>
-    </div>
+  <!-- VISTA 1: GASTOS PUNTUALES (ÁMBAR) -->
+  <section id="viewPuntuales">
+    <form id="formPuntual" class="form-card variable-theme">
+      <div class="section-heading">
+        <span class="dot variable"></span> Añadir gasto puntual
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="punConcepto">¿En qué has gastado?</label>
+        <input class="input" type="text" id="punConcepto" placeholder="Ej. Mercadona, Café, Farmacia..." required />
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label" for="punImporte">Importe (€)</label>
+          <input class="input" type="number" inputmode="decimal" step="0.01" min="0.01" id="punImporte" placeholder="0,00" required />
+        </div>
+        <div>
+          <label class="field-label" for="punFecha">Fecha</label>
+          <input class="input" type="date" id="punFecha" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit btn-variable">Guardar gasto puntual</button>
+    </form>
+
+    <div class="list-header">Puntuales este mes</div>
+    <div id="listPuntuales" class="item-list"></div>
   </section>
-</div>
 
-<div id="settingsModal" class="modal-backdrop hidden">
-  <div class="modal-card">
-    <div class="card-title">Conexión con Google Apps Script</div>
-    <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">
-      Pega aquí la URL de tu aplicación web implementada en Google Apps Script (termina en <code>/exec</code>).
-    </p>
-    <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; margin-bottom: 14px;" />
-    <div style="display: flex; justify-content: flex-end; gap: 8px;">
-      <button class="btn btn-ghost" id="btnCloseSettings">Cerrar</button>
-      <button class="btn" id="btnSaveSettings">Guardar URL</button>
-    </div>
-  </div>
-</div>
+  <!-- VISTA 2: GASTOS FIJOS (ÍNDIGO) -->
+  <section id="viewFijos" class="hidden">
+    <form id="formFijo" class="form-card fixed-theme">
+      <div class="section-heading">
+        <span class="dot fixed"></span> Añadir gasto fijo mensual
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="fixConcepto">Concepto del recibo</label>
+        <input class="input" type="text" id="fixConcepto" placeholder="Ej. Alquiler piso, Factura luz..." required />
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label" for="fixImporte">Importe (€)</label>
+          <input class="input" type="number" inputmode="decimal" step="0.01" min="0.01" id="fixImporte" placeholder="0,00" required />
+        </div>
+        <div>
+          <label class="field-label" for="fixCategoria">Categoría</label>
+          <select class="input" id="fixCategoria">
+            <option value="Alquiler">Alquiler</option>
+            <option value="Luz">Luz</option>
+            <option value="Internet">Internet</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit btn-fixed">Guardar gasto fijo</button>
+    </form>
+
+    <div class="list-header">Tus recibos fijos</div>
+    <div id="listFijos" class="item-list"></div>
+  </section>
+</main>
 
 <div id="toast" class="toast hidden"></div>
 
 <script>
-  const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbzRkndI7vLONGGWdUHKdirdNr48v0eYiFcp6YbHYyZ_pKhpzTLmYtwMgRPH3cDDWdAwSA/exec';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzRkndI7vLONGGWdUHKdirdNr48v0eYiFcp6YbHYyZ_pKhpzTLmYtwMgRPH3cDDWdAwSA/exec';
 
-  let apiUrl = localStorage.getItem('gastos_api_url') || DEFAULT_API_URL;
   let state = { fijos: [], puntuales: [] };
-  let currentTicketProducts = [];
-
   const $ = (id) => document.getElementById(id);
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -537,328 +583,175 @@
     const dd = String(now.getDate()).padStart(2, '0');
 
     $('monthPicker').value = `${yyyy}-${mm}`;
-    $('manFecha').value = `${yyyy}-${mm}-${dd}`;
+    $('punFecha').value = `${yyyy}-${mm}-${dd}`;
 
-    setupEvents();
-
-    if (!apiUrl) {
-      $('settingsModal').classList.remove('hidden');
-    } else {
-      loadData();
-    }
+    bindEvents();
+    loadData();
   });
 
-  function setupEvents() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const target = btn.dataset.tab;
-        $('section-puntuales').classList.toggle('hidden', target !== 'puntuales');
-        $('section-fijos').classList.toggle('hidden', target !== 'fijos');
-      });
+  function bindEvents() {
+    // Cambio de pestañas con cambio de color activo
+    $('tabPuntuales').addEventListener('click', () => {
+      $('tabPuntuales').className = 'seg-btn active-variable';
+      $('tabFijos').className = 'seg-btn';
+      $('viewPuntuales').classList.remove('hidden');
+      $('viewFijos').classList.add('hidden');
+    });
+
+    $('tabFijos').addEventListener('click', () => {
+      $('tabFijos').className = 'seg-btn active-fixed';
+      $('tabPuntuales').className = 'seg-btn';
+      $('viewFijos').classList.remove('hidden');
+      $('viewPuntuales').classList.add('hidden');
     });
 
     $('monthPicker').addEventListener('change', loadData);
     $('btnRefresh').addEventListener('click', loadData);
 
-    $('btnSettings').addEventListener('click', () => {
-      $('apiUrlInput').value = apiUrl;
-      $('settingsModal').classList.remove('hidden');
-    });
-    $('btnCloseSettings').addEventListener('click', () => $('settingsModal').classList.add('hidden'));
-    $('btnSaveSettings').addEventListener('click', () => {
-      const val = $('apiUrlInput').value.trim();
-      if (!val.startsWith('https://')) {
-        showToast('Introduce una URL válida que empiece por https://');
-        return;
-      }
-      apiUrl = val;
-      localStorage.setItem('gastos_api_url', apiUrl);
-      $('settingsModal').classList.add('hidden');
-      loadData();
-    });
-
-    $('formFijo').addEventListener('submit', async (e) => {
+    // Guardar Gasto Puntual
+    $('formPuntual').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const concepto = $('fixConcepto').value.trim();
-      const categoria = $('fixCategoria').value;
-      const importe = parseFloat($('fixImporte').value);
-      if (!concepto || isNaN(importe)) return;
+      const concepto = $('punConcepto').value.trim();
+      const importe = parseFloat($('punImporte').value);
+      const fecha = $('punFecha').value;
+      if (!concepto || isNaN(importe) || !fecha) return;
 
-      await postAction({ action: 'addFixed', concepto, categoria, importe });
-      $('formFijo').reset();
-      showToast('Gasto fijo añadido');
-      loadData();
-    });
-
-    $('formManual').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const concepto = $('manConcepto').value.trim();
-      const fecha = $('manFecha').value;
-      const importe = parseFloat($('manImporte').value);
-      if (!concepto || !fecha || isNaN(importe)) return;
-
-      await postAction({ action: 'addManualExpense', concepto, fecha, importe, categoria: 'Puntual' });
-      $('manConcepto').value = '';
-      $('manImporte').value = '';
+      await postAction({ action: 'addManualExpense', concepto, importe, fecha });
+      $('punConcepto').value = '';
+      $('punImporte').value = '';
       showToast('Gasto puntual guardado');
       loadData();
     });
 
-    $('btnScanTicket').addEventListener('click', () => $('cameraInput').click());
-    $('cameraInput').addEventListener('change', handleTicketPhoto);
+    // Guardar Gasto Fijo
+    $('formFijo').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const concepto = $('fixConcepto').value.trim();
+      const importe = parseFloat($('fixImporte').value);
+      const categoria = $('fixCategoria').value;
+      if (!concepto || isNaN(importe)) return;
 
-    $('btnCancelReview').addEventListener('click', () => {
-      $('ticketReviewCard').classList.add('hidden');
-      $('cameraInput').value = '';
-    });
-
-    $('btnAddProductRow').addEventListener('click', () => {
-      currentTicketProducts.push({ nombre: '', cantidad: 1, precio: 0 });
-      renderReviewProducts();
-    });
-
-    $('revTotal').addEventListener('input', checkProductsSum);
-
-    $('btnSaveTicket').addEventListener('click', async () => {
-      const supermercado = $('revSupermercado').value.trim() || 'Supermercado';
-      const fecha = $('revFecha').value;
-      const total = parseFloat($('revTotal').value);
-
-      if (!fecha || isNaN(total)) {
-        showToast('Revisa la fecha y el total del ticket');
-        return;
-      }
-
-      const validProducts = currentTicketProducts.filter(p => p.nombre.trim() !== '');
-      $('btnSaveTicket').disabled = true;
-      $('btnSaveTicket').textContent = 'Guardando...';
-
-      await postAction({
-        action: 'saveTicket',
-        supermercado,
-        fecha,
-        total,
-        productos: validProducts
-      });
-
-      $('btnSaveTicket').disabled = false;
-      $('btnSaveTicket').textContent = 'Confirmar y Guardar Ticket';
-      $('ticketReviewCard').classList.add('hidden');
-      $('cameraInput').value = '';
-      showToast('Ticket y desglose guardados');
+      await postAction({ action: 'addFixed', concepto, importe, categoria });
+      $('fixConcepto').value = '';
+      $('fixImporte').value = '';
+      showToast('Gasto fijo guardado');
       loadData();
     });
   }
 
   async function loadData() {
-    if (!apiUrl) return;
-    setLoading(true);
+    setSync('Cargando...');
     try {
       const month = $('monthPicker').value;
-      const res = await fetch(`${apiUrl}?month=${encodeURIComponent(month)}`);
+      const res = await fetch(`${API_URL}?month=${encodeURIComponent(month)}`);
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Error cargando datos');
+      if (!data.ok) throw new Error(data.error || 'Error de lectura');
       state = data;
       renderAll();
+      setSync('Al día');
     } catch (err) {
-      showToast('Error: ' + err.message);
-    } finally {
-      setLoading(false);
+      setSync('Error');
+      showToast('Error al cargar datos');
     }
   }
 
   async function postAction(payload) {
-    if (!apiUrl) {
-      $('settingsModal').classList.remove('hidden');
-      throw new Error('Configura la URL del script');
-    }
-    setLoading(true);
+    setSync('Guardando...');
     try {
-      const res = await fetch(apiUrl, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Error en servidor');
+      if (!data.ok) throw new Error(data.error || 'Error al guardar');
       return data;
     } catch (err) {
-      showToast('Error: ' + err.message, 5500);
+      setSync('Error');
+      showToast('Error: ' + err.message);
       throw err;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function compressImage(file, maxWidth = 1600, quality = 0.85) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          let w = img.width;
-          let h = img.height;
-          if (w > maxWidth) {
-            h = Math.round((h * maxWidth) / w);
-            w = maxWidth;
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(dataUrl.split(',')[1]);
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function handleTicketPhoto(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const btn = $('btnScanTicket');
-    btn.disabled = true;
-    btn.textContent = 'Analizando ticket con IA...';
-
-    try {
-      const base64 = await compressImage(file, 1600, 0.85);
-      const res = await postAction({
-        action: 'scanTicket',
-        imageBase64: base64,
-        mimeType: 'image/jpeg'
-      });
-
-      const t = res.ticket;
-      $('revSupermercado').value = t.supermercado || '';
-      $('revFecha').value = t.fecha || $('manFecha').value;
-      $('revTotal').value = Number(t.total || 0).toFixed(2);
-      currentTicketProducts = (t.productos || []).map(p => ({
-        nombre: p.nombre || '',
-        cantidad: Number(p.cantidad) || 1,
-        precio: Number(p.precio) || 0
-      }));
-
-      renderReviewProducts();
-      $('ticketReviewCard').classList.remove('hidden');
-      $('ticketReviewCard').scrollIntoView({ behavior: 'smooth' });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Escanear Ticket con Cámara (IA)';
-    }
-  }
-
-  function renderReviewProducts() {
-    const container = $('revProductsList');
-    container.innerHTML = '';
-
-    currentTicketProducts.forEach((prod, index) => {
-      const row = document.createElement('div');
-      row.className = 'product-edit-row';
-      row.innerHTML = `
-        <input type="text" value="${escapeHtml(prod.nombre)}" placeholder="Producto" data-field="nombre" data-idx="${index}" />
-        <input type="number" step="0.01" value="${prod.cantidad}" placeholder="Ud" data-field="cantidad" data-idx="${index}" />
-        <input type="number" step="0.01" value="${prod.precio}" placeholder="€" data-field="precio" data-idx="${index}" />
-        <button type="button" class="btn btn-danger" data-del="${index}">X</button>
-      `;
-      container.appendChild(row);
-    });
-
-    container.querySelectorAll('input').forEach(inp => {
-      inp.addEventListener('input', (e) => {
-        const idx = Number(e.target.dataset.idx);
-        const field = e.target.dataset.field;
-        currentTicketProducts[idx][field] = field === 'nombre' ? e.target.value : (parseFloat(e.target.value) || 0);
-        if (field === 'precio') checkProductsSum();
-      });
-    });
-
-    container.querySelectorAll('[data-del]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = Number(e.target.dataset.del);
-        currentTicketProducts.splice(idx, 1);
-        renderReviewProducts();
-      });
-    });
-
-    checkProductsSum();
-  }
-
-  function checkProductsSum() {
-    const sum = currentTicketProducts.reduce((acc, p) => acc + (Number(p.precio) || 0), 0);
-    const total = parseFloat($('revTotal').value) || 0;
-    const diff = Math.abs(sum - total);
-    const alertBox = $('revMismatchAlert');
-
-    if (diff > 0.05) {
-      alertBox.textContent = `Aviso: La suma de productos (${formatEuro(sum)}) difiere del total del ticket (${formatEuro(total)}).`;
-      alertBox.classList.remove('hidden');
-    } else {
-      alertBox.classList.add('hidden');
     }
   }
 
   function renderAll() {
-    let totalFijos = 0;
-    let pagadoFijos = 0;
-    state.fijos.forEach(f => {
-      totalFijos += f.importe;
-      if (f.pagado) pagadoFijos += f.importe;
-    });
-
+    const totalFijos = state.fijos.reduce((acc, f) => acc + f.importe, 0);
+    const pagadoFijos = state.fijos.reduce((acc, f) => acc + (f.pagado ? f.importe : 0), 0);
     const totalPuntuales = state.puntuales.reduce((acc, p) => acc + p.importe, 0);
 
     $('totalFijos').textContent = formatEuro(totalFijos);
-    $('subFijos').textContent = `Pagado: ${formatEuro(pagadoFijos)} | Pend.: ${formatEuro(totalFijos - pagadoFijos)}`;
+    $('subFijos').textContent = `Pagado: ${formatEuro(pagadoFijos)}`;
     $('totalPuntuales').textContent = formatEuro(totalPuntuales);
-    $('subPuntuales').textContent = `${state.puntuales.length} movimientos`;
+    $('subPuntuales').textContent = `${state.puntuales.length} ${state.puntuales.length === 1 ? 'apunte' : 'apuntes'}`;
     $('totalMes').textContent = formatEuro(totalFijos + totalPuntuales);
 
-    renderFijos();
     renderPuntuales();
+    renderFijos();
   }
 
-  function renderFijos() {
-    const container = $('listFijos');
-    if (state.fijos.length === 0) {
-      container.innerHTML = '<p class="expense-meta">No hay gastos fijos configurados todavía.</p>';
+  function renderPuntuales() {
+    const list = $('listPuntuales');
+    if (state.puntuales.length === 0) {
+      list.innerHTML = '<div class="empty-msg">Sin gastos puntuales en este mes.</div>';
       return;
     }
 
-    container.innerHTML = '';
-    state.fijos.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'expense-item';
-      div.innerHTML = `
-        <div class="expense-main">
-          <div class="expense-info">
-            <div class="expense-title">
-              <span>${escapeHtml(item.concepto)}</span>
-              <span class="badge">${escapeHtml(item.categoria)}</span>
-            </div>
-          </div>
-          <div class="expense-actions">
-            <span class="amount">${formatEuro(item.importe)}</span>
-            <button class="pay-toggle ${item.pagado ? 'paid' : ''}" data-toggle="${item.id}">
-              ${item.pagado ? 'Pagado' : 'Pendiente'}
-            </button>
-            <button class="btn btn-danger" data-delfix="${item.id}">Eliminar</button>
-          </div>
+    list.innerHTML = '';
+    state.puntuales.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'expense-row variable-row';
+      el.innerHTML = `
+        <div class="row-main">
+          <div class="row-title">${escapeHtml(item.concepto)}</div>
+          <div class="row-sub">${formatShortDate(item.fecha)}</div>
+        </div>
+        <div class="row-right">
+          <span class="row-amount">${formatEuro(item.importe)}</span>
+          <button type="button" class="del-btn" data-delpun="${item.id}" aria-label="Borrar">✕</button>
         </div>
       `;
-      container.appendChild(div);
+      list.appendChild(el);
     });
 
-    container.querySelectorAll('[data-toggle]').forEach(btn => {
+    list.querySelectorAll('[data-delpun]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Borrar este gasto puntual?')) return;
+        await postAction({ action: 'deleteExpense', id: btn.dataset.delpun });
+        showToast('Gasto eliminado');
+        loadData();
+      });
+    });
+  }
+
+  function renderFijos() {
+    const list = $('listFijos');
+    if (state.fijos.length === 0) {
+      list.innerHTML = '<div class="empty-msg">Añade arriba tus gastos fijos (Alquiler, Luz, Internet).</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    state.fijos.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'expense-row fixed-row';
+      el.innerHTML = `
+        <div class="row-main">
+          <div class="row-title">${escapeHtml(item.concepto)}</div>
+          <div class="row-sub">
+            <span class="pill pill-fixed">${escapeHtml(item.categoria)}</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="row-amount">${formatEuro(item.importe)}</span>
+          <button type="button" class="status-btn ${item.pagado ? 'is-paid' : ''}" data-toggle="${item.id}">
+            ${item.pagado ? 'Pagado' : 'Pendiente'}
+          </button>
+          <button type="button" class="del-btn" data-delfix="${item.id}" aria-label="Borrar">✕</button>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+
+    list.querySelectorAll('[data-toggle]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.toggle;
         const item = state.fijos.find(x => x.id === id);
@@ -873,73 +766,11 @@
       });
     });
 
-    container.querySelectorAll('[data-delfix]').forEach(btn => {
+    list.querySelectorAll('[data-delfix]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('¿Eliminar este gasto fijo mensual?')) return;
         await postAction({ action: 'deleteFixed', id: btn.dataset.delfix });
-        loadData();
-      });
-    });
-  }
-
-  function renderPuntuales() {
-    const container = $('listPuntuales');
-    if (state.puntuales.length === 0) {
-      container.innerHTML = '<p class="expense-meta">No hay gastos puntuales registrados en este mes.</p>';
-      return;
-    }
-
-    container.innerHTML = '';
-    state.puntuales.forEach(item => {
-      const hasTicket = item.productos && item.productos.length > 0;
-      const div = document.createElement('div');
-      div.className = 'expense-item';
-
-      let productsHtml = '';
-      if (hasTicket) {
-        productsHtml = `
-          <div class="ticket-details" id="det-${item.id}">
-            ${item.productos.map(p => `
-              <div class="ticket-line">
-                <span>${p.cantidad !== 1 ? p.cantidad + 'x ' : ''}${escapeHtml(p.producto)}</span>
-                <span>${formatEuro(p.precio)}</span>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-
-      div.innerHTML = `
-        <div class="expense-main">
-          <div class="expense-info">
-            <div class="expense-title">
-              <span>${escapeHtml(item.concepto)}</span>
-              ${hasTicket ? `<span class="badge badge-ia">Ticket (${item.productos.length} prod.)</span>` : ''}
-            </div>
-            <div class="expense-meta">${item.fecha}${hasTicket ? ' · Pulsa "Desglose" para ver productos' : ''}</div>
-          </div>
-          <div class="expense-actions">
-            <span class="amount">${formatEuro(item.importe)}</span>
-            ${hasTicket ? `<button class="btn btn-ghost" style="padding:6px 10px; font-size:0.82rem;" data-expand="${item.id}">Desglose</button>` : ''}
-            <button class="btn btn-danger" data-delgas="${item.id}">Borrar</button>
-          </div>
-        </div>
-        ${productsHtml}
-      `;
-      container.appendChild(div);
-    });
-
-    container.querySelectorAll('[data-expand]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const box = $(`det-${btn.dataset.expand}`);
-        if (box) box.classList.toggle('open');
-      });
-    });
-
-    container.querySelectorAll('[data-delgas]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('¿Borrar este gasto y su desglose de productos?')) return;
-        await postAction({ action: 'deleteExpense', id: btn.dataset.delgas });
+        showToast('Gasto fijo eliminado');
         loadData();
       });
     });
@@ -949,22 +780,28 @@
     return Number(num || 0).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
   }
 
+  function formatShortDate(iso) {
+    const parts = String(iso).split('-');
+    if (parts.length !== 3) return iso;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[m]));
   }
 
-  function setLoading(show) {
-    $('loadingIndicator').classList.toggle('hidden', !show);
+  function setSync(text) {
+    $('syncStatus').textContent = text;
   }
 
-  function showToast(msg, duration = 3200) {
+  function showToast(msg) {
     const t = $('toast');
     t.textContent = msg;
     t.classList.remove('hidden');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.add('hidden'), duration);
+    t._timer = setTimeout(() => t.classList.add('hidden'), 2600);
   }
 </script>
 </body>
