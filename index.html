@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Gastos" />
+  <link id="appleIcon" rel="apple-touch-icon" href="" />
   <title>Mis Gastos</title>
   <style>
     :root {
@@ -17,17 +18,17 @@
       --text: #f8fafc;
       --text-muted: #94a3b8;
 
-      /* Color Gastos Fijos: Índigo */
+      /* Gastos Fijos: Índigo */
       --fixed: #6366f1;
       --fixed-soft: rgba(99, 102, 241, 0.14);
       --fixed-border: rgba(99, 102, 241, 0.38);
 
-      /* Color Gastos Puntuales: Ámbar */
+      /* Gastos Puntuales: Ámbar */
       --var: #f59e0b;
       --var-soft: rgba(245, 158, 11, 0.14);
       --var-border: rgba(245, 158, 11, 0.38);
 
-      /* Estado Pagado / Peligro */
+      /* Estados */
       --paid: #22c55e;
       --paid-soft: rgba(34, 197, 94, 0.14);
       --danger: #ef4444;
@@ -44,14 +45,13 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding-top: max(16px, env(safe-area-inset-top));
-      padding-bottom: max(32px, env(safe-area-inset-bottom));
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: max(36px, env(safe-area-inset-bottom));
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
       min-height: 100dvh;
     }
 
-    /* Optimizado para iPhone 15 Pro (393px) y centrado en pantallas mayores */
     .app {
       width: 100%;
       max-width: 430px;
@@ -64,7 +64,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       gap: 10px;
     }
 
@@ -106,20 +106,20 @@
       cursor: pointer;
     }
 
-    /* Resumen Total + Desglose por Color */
+    /* Total General */
     .hero-total {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 16px 18px;
-      margin-bottom: 12px;
+      padding: 15px 18px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .hero-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
@@ -132,16 +132,25 @@
       letter-spacing: -0.03em;
     }
 
-    .sync-dot {
-      font-size: 0.78rem;
+    .sync-badge {
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface-elevated);
       color: var(--text-muted);
     }
 
+    .sync-badge.syncing {
+      color: var(--var);
+    }
+
+    /* Tarjetas Fijos vs Puntuales */
     .split-cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .mini-card {
@@ -179,6 +188,7 @@
       height: 8px;
       border-radius: 50%;
       display: inline-block;
+      flex-shrink: 0;
     }
     .dot.fixed { background: var(--fixed); }
     .dot.variable { background: var(--var); }
@@ -194,7 +204,51 @@
       margin-top: 3px;
     }
 
-    /* Selector de Vista (Segmented Control estilo iOS) */
+    /* Barra de Presupuesto Puntuales */
+    .budget-bar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 14px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .budget-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      margin-bottom: 7px;
+    }
+
+    .budget-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .budget-numbers {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      background: var(--surface-elevated);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--var);
+      border-radius: 999px;
+      transition: width 0.25s ease, background-color 0.25s ease;
+    }
+
+    /* Selector de Vista */
     .segmented {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -202,7 +256,7 @@
       padding: 4px;
       border-radius: 14px;
       border: 1px solid var(--border);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       gap: 4px;
     }
 
@@ -229,7 +283,7 @@
       font-weight: 700;
     }
 
-    /* Formulario Claro y Espaciado */
+    /* Formularios */
     .form-card {
       background: var(--surface);
       border-radius: 18px;
@@ -238,16 +292,11 @@
       border: 1px solid var(--border);
     }
 
-    .form-card.fixed-theme {
-      border-top: 3px solid var(--fixed);
-    }
-
-    .form-card.variable-theme {
-      border-top: 3px solid var(--var);
-    }
+    .form-card.fixed-theme { border-top: 3px solid var(--fixed); }
+    .form-card.variable-theme { border-top: 3px solid var(--var); }
 
     .section-heading {
-      font-size: 0.98rem;
+      font-size: 0.96rem;
       font-weight: 700;
       margin-bottom: 12px;
       display: flex;
@@ -255,26 +304,50 @@
       gap: 8px;
     }
 
-    .field-group {
-      margin-bottom: 12px;
+    /* Chips rápidos */
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 2px;
+      scrollbar-width: none;
     }
+    .quick-chips::-webkit-scrollbar { display: none; }
+
+    .chip {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .chip:active {
+      background: var(--var-soft);
+      border-color: var(--var);
+    }
+
+    .field-group { margin-bottom: 12px; }
 
     .field-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .field-label {
       display: block;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: var(--text-muted);
       margin-bottom: 5px;
     }
 
-    /* 16px obligatorio en iOS para evitar auto-zoom al enfocar */
     .input {
       width: 100%;
       height: 46px;
@@ -287,8 +360,31 @@
       outline: none;
     }
 
-    .input:focus {
-      border-color: var(--text);
+    .input:focus { border-color: var(--text); }
+
+    /* Selector de Subcategoría Puntual */
+    .tag-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .tag-btn {
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tag-btn.selected {
+      background: var(--var-soft);
+      border-color: var(--var);
+      color: #fcd34d;
     }
 
     .btn-submit {
@@ -299,38 +395,60 @@
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.15s;
     }
 
-    .btn-submit:active {
-      opacity: 0.8;
+    .btn-submit:active { opacity: 0.85; }
+    .btn-fixed { background: var(--fixed); color: #fff; }
+    .btn-variable { background: var(--var); color: #0b0f19; }
+
+    /* Cabecera de lista + filtros */
+    .list-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
     }
 
-    .btn-fixed {
-      background: var(--fixed);
-      color: #fff;
-    }
-
-    .btn-variable {
-      background: var(--var);
-      color: #0b0f19;
-    }
-
-    /* Listado de Movimientos */
     .list-header {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
-      margin-bottom: 10px;
-      padding-left: 2px;
     }
 
+    .filter-pills {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+
+    .f-pill {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .f-pill.active {
+      background: var(--var-soft);
+      border-color: var(--var);
+      color: #fcd34d;
+    }
+
+    /* Filas de gastos */
     .item-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .expense-row {
@@ -342,15 +460,15 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
+      cursor: pointer;
     }
 
-    .expense-row.fixed-row {
-      border-left: 4px solid var(--fixed);
+    .expense-row:active {
+      background: var(--surface-elevated);
     }
 
-    .expense-row.variable-row {
-      border-left: 4px solid var(--var);
-    }
+    .expense-row.fixed-row { border-left: 4px solid var(--fixed); }
+    .expense-row.variable-row { border-left: 4px solid var(--var); }
 
     .row-main {
       min-width: 0;
@@ -358,7 +476,7 @@
     }
 
     .row-title {
-      font-size: 0.98rem;
+      font-size: 0.96rem;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
@@ -367,7 +485,7 @@
     }
 
     .row-sub {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       display: flex;
       align-items: center;
@@ -377,14 +495,12 @@
     .pill {
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
     }
 
-    .pill-fixed {
-      background: var(--fixed-soft);
-      color: #a5b4fc;
-    }
+    .pill-fixed { background: var(--fixed-soft); color: #a5b4fc; }
+    .pill-var { background: var(--var-soft); color: #fcd34d; }
 
     .row-right {
       display: flex;
@@ -403,7 +519,7 @@
       height: 34px;
       padding: 0 10px;
       border-radius: 9px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
@@ -417,32 +533,87 @@
       color: var(--paid);
     }
 
-    .del-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      border: none;
-      background: rgba(239, 68, 68, 0.12);
-      color: var(--danger);
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .empty-msg {
       text-align: center;
       padding: 24px 12px;
       color: var(--text-muted);
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       background: var(--surface);
       border-radius: 15px;
       border: 1px dashed var(--border);
     }
 
     .hidden { display: none !important; }
+
+    /* Bottom Sheet Modal estilo iOS para editar */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .sheet-card {
+      width: 100%;
+      max-width: 430px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-radius: 22px 22px 0 0;
+      padding: 18px 18px max(26px, env(safe-area-inset-bottom));
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .sheet-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .sheet-close {
+      background: var(--surface-elevated);
+      border: none;
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .sheet-actions {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-delete-sheet {
+      height: 48px;
+      border-radius: 13px;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
     .toast {
       position: fixed;
@@ -454,10 +625,10 @@
       color: var(--text);
       padding: 10px 18px;
       border-radius: 999px;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-      z-index: 99;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
+      z-index: 120;
       white-space: nowrap;
     }
   </style>
@@ -470,7 +641,7 @@
     <h1 class="app-title">Gastos</h1>
     <div class="month-control">
       <input type="month" id="monthPicker" aria-label="Seleccionar mes" />
-      <button class="btn-refresh" id="btnRefresh" title="Actualizar">&#x21bb;</button>
+      <button class="btn-refresh" id="btnRefresh" title="Sincronizar">&#x21bb;</button>
     </div>
   </header>
 
@@ -480,10 +651,10 @@
       <div class="hero-label">Total del mes</div>
       <div class="hero-amount" id="totalMes">0,00 €</div>
     </div>
-    <div class="sync-dot" id="syncStatus">Al día</div>
+    <div class="sync-badge" id="syncStatus">Al día</div>
   </section>
 
-  <!-- Tarjetas Diferenciadas por Color -->
+  <!-- Tarjetas Fijos vs Puntuales -->
   <section class="split-cards">
     <div class="mini-card fixed">
       <div class="mini-title"><span class="dot fixed"></span> Fijos</div>
@@ -494,6 +665,17 @@
       <div class="mini-title"><span class="dot variable"></span> Puntuales</div>
       <div class="mini-amount" id="totalPuntuales">0,00 €</div>
       <div class="mini-sub" id="subPuntuales">0 apuntes</div>
+    </div>
+  </section>
+
+  <!-- Barra de Presupuesto Puntuales (tocar para editar tope) -->
+  <section class="budget-bar-card" id="budgetCard" title="Toca para ajustar presupuesto">
+    <div class="budget-top">
+      <span class="budget-label">Presupuesto puntuales (tocar para ajustar)</span>
+      <span class="budget-numbers" id="budgetText">0 € / 400 €</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="budgetFill"></div>
     </div>
   </section>
 
@@ -510,8 +692,11 @@
         <span class="dot variable"></span> Añadir gasto puntual
       </div>
 
+      <!-- Chips de conceptos frecuentes -->
+      <div class="quick-chips" id="quickChips"></div>
+
       <div class="field-group">
-        <label class="field-label" for="punConcepto">¿En qué has gastado?</label>
+        <label class="field-label" for="punConcepto">Concepto</label>
         <input class="input" type="text" id="punConcepto" placeholder="Ej. Mercadona, Café, Farmacia..." required />
       </div>
 
@@ -526,10 +711,27 @@
         </div>
       </div>
 
+      <label class="field-label">Etiqueta</label>
+      <div class="tag-selector" id="punTags">
+        <button type="button" class="tag-btn selected" data-tag="Súper">Súper</button>
+        <button type="button" class="tag-btn" data-tag="Mascotas">Mascotas</button>
+        <button type="button" class="tag-btn" data-tag="Ocio">Ocio</button>
+        <button type="button" class="tag-btn" data-tag="Varios">Varios</button>
+      </div>
+
       <button type="submit" class="btn-submit btn-variable">Guardar gasto puntual</button>
     </form>
 
-    <div class="list-header">Puntuales este mes</div>
+    <div class="list-top">
+      <div class="list-header">Historial</div>
+      <div class="filter-pills" id="filterPills">
+        <button type="button" class="f-pill active" data-filter="Todos">Todos</button>
+        <button type="button" class="f-pill" data-filter="Súper">Súper</button>
+        <button type="button" class="f-pill" data-filter="Mascotas">Mascotas</button>
+        <button type="button" class="f-pill" data-filter="Ocio">Ocio</button>
+        <button type="button" class="f-pill" data-filter="Varios">Varios</button>
+      </div>
+    </div>
     <div id="listPuntuales" class="item-list"></div>
   </section>
 
@@ -547,7 +749,7 @@
 
       <div class="field-row">
         <div>
-          <label class="field-label" for="fixImporte">Importe (€)</label>
+          <label class="field-label" for="fixImporte">Importe habitual (€)</label>
           <input class="input" type="number" inputmode="decimal" step="0.01" min="0.01" id="fixImporte" placeholder="0,00" required />
         </div>
         <div>
@@ -563,10 +765,87 @@
       <button type="submit" class="btn-submit btn-fixed">Guardar gasto fijo</button>
     </form>
 
-    <div class="list-header">Tus recibos fijos</div>
+    <div class="list-top">
+      <div class="list-header">Recibos del mes (tocar para editar)</div>
+    </div>
     <div id="listFijos" class="item-list"></div>
   </section>
 </main>
+
+<!-- Bottom Sheet: Editar Gasto Puntual -->
+<div id="editPuntualModal" class="sheet-backdrop hidden">
+  <div class="sheet-card">
+    <div class="sheet-header">
+      <span class="sheet-title">Editar gasto puntual</span>
+      <button type="button" class="sheet-close" id="closeEditPun">✕</button>
+    </div>
+    <input type="hidden" id="editPunId" />
+    <div class="field-group">
+      <label class="field-label">Concepto</label>
+      <input class="input" type="text" id="editPunConcepto" />
+    </div>
+    <div class="field-row">
+      <div>
+        <label class="field-label">Importe (€)</label>
+        <input class="input" type="number" inputmode="decimal" step="0.01" id="editPunImporte" />
+      </div>
+      <div>
+        <label class="field-label">Fecha</label>
+        <input class="input" type="date" id="editPunFecha" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Etiqueta</label>
+      <select class="input" id="editPunCategoria">
+        <option value="Súper">Súper</option>
+        <option value="Mascotas">Mascotas</option>
+        <option value="Ocio">Ocio</option>
+        <option value="Varios">Varios</option>
+      </select>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-delete-sheet" id="btnDelPunModal">Borrar</button>
+      <button type="button" class="btn-submit btn-variable" id="btnSavePunModal">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Sheet: Editar Gasto Fijo (permite cambiar importe solo este mes, ej. Luz) -->
+<div id="editFijoModal" class="sheet-backdrop hidden">
+  <div class="sheet-card">
+    <div class="sheet-header">
+      <span class="sheet-title">Editar recibo fijo</span>
+      <button type="button" class="sheet-close" id="closeEditFix">✕</button>
+    </div>
+    <input type="hidden" id="editFixId" />
+    <div class="field-group">
+      <label class="field-label">Concepto</label>
+      <input class="input" type="text" id="editFixConcepto" />
+    </div>
+    <div class="field-row">
+      <div>
+        <label class="field-label">Importe este mes (€)</label>
+        <input class="input" type="number" inputmode="decimal" step="0.01" id="editFixImporte" />
+      </div>
+      <div>
+        <label class="field-label">Categoría</label>
+        <select class="input" id="editFixCategoria">
+          <option value="Alquiler">Alquiler</option>
+          <option value="Luz">Luz</option>
+          <option value="Internet">Internet</option>
+        </select>
+      </div>
+    </div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="editFixUpdateBase" />
+      <span>Actualizar también como importe fijo para futuros meses (desmarca si es factura variable como la Luz)</span>
+    </label>
+    <div class="sheet-actions">
+      <button type="button" class="btn-delete-sheet" id="btnDelFixModal">Borrar</button>
+      <button type="button" class="btn-submit btn-fixed" id="btnSaveFixModal">Guardar cambios</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast" class="toast hidden"></div>
 
@@ -574,9 +853,15 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycbzRkndI7vLONGGWdUHKdirdNr48v0eYiFcp6YbHYyZ_pKhpzTLmYtwMgRPH3cDDWdAwSA/exec';
 
   let state = { fijos: [], puntuales: [] };
+  let selectedTag = 'Súper';
+  let activeFilter = 'Todos';
+  let monthlyBudget = Number(localStorage.getItem('gastos_budget')) || 400;
+
   const $ = (id) => document.getElementById(id);
 
   document.addEventListener('DOMContentLoaded', () => {
+    generateAppIcon();
+
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -586,11 +871,62 @@
     $('punFecha').value = `${yyyy}-${mm}-${dd}`;
 
     bindEvents();
+    handleUrlShortcuts();
     loadData();
   });
 
+  // Genera un icono limpio de app para Pantalla de Inicio en iPhone
+  function generateAppIcon() {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0b0f19';
+      ctx.fillRect(0, 0, 180, 180);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(90, 90, 62, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0b0f19';
+      ctx.font = 'bold 76px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('€', 90, 95);
+
+      $('appleIcon').href = canvas.toDataURL('image/png');
+    } catch (e) {}
+  }
+
+  // Soporte para Atajos de iOS / Apple Pay (?concepto=...&importe=...)
+  function handleUrlShortcuts() {
+    const params = new URLSearchParams(window.location.search);
+    const concepto = params.get('concepto');
+    const importe = params.get('importe');
+    const fecha = params.get('fecha');
+    const categoria = params.get('categoria');
+
+    if (concepto || importe) {
+      if (concepto) $('punConcepto').value = concepto;
+      if (importe) $('punImporte').value = parseFloat(importe.replace(',', '.')) || '';
+      if (fecha) $('punFecha').value = fecha;
+      if (categoria) {
+        selectedTag = categoria;
+        document.querySelectorAll('#punTags .tag-btn').forEach(b => {
+          b.classList.toggle('selected', b.dataset.tag === categoria);
+        });
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => {
+        if (!importe) $('punImporte').focus();
+      }, 200);
+    }
+  }
+
   function bindEvents() {
-    // Cambio de pestañas con cambio de color activo
+    // Pestañas
     $('tabPuntuales').addEventListener('click', () => {
       $('tabPuntuales').className = 'seg-btn active-variable';
       $('tabFijos').className = 'seg-btn';
@@ -608,39 +944,166 @@
     $('monthPicker').addEventListener('change', loadData);
     $('btnRefresh').addEventListener('click', loadData);
 
-    // Guardar Gasto Puntual
-    $('formPuntual').addEventListener('submit', async (e) => {
+    // Configurar presupuesto mensual al tocar la barra
+    $('budgetCard').addEventListener('click', () => {
+      const nuevo = prompt('Presupuesto mensual para gastos puntuales (€):', monthlyBudget);
+      if (nuevo === null) return;
+      const val = parseFloat(nuevo.replace(',', '.'));
+      if (!isNaN(val) && val > 0) {
+        monthlyBudget = val;
+        localStorage.setItem('gastos_budget', String(val));
+        renderAll();
+      }
+    });
+
+    // Etiquetas rápidas en formulario puntual
+    document.querySelectorAll('#punTags .tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#punTags .tag-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTag = btn.dataset.tag;
+      });
+    });
+
+    // Filtros de historial puntual
+    document.querySelectorAll('#filterPills .f-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#filterPills .f-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeFilter = pill.dataset.filter;
+        renderPuntuales();
+      });
+    });
+
+    // Guardar Gasto Puntual (Optimistic UI)
+    $('formPuntual').addEventListener('submit', (e) => {
       e.preventDefault();
       const concepto = $('punConcepto').value.trim();
       const importe = parseFloat($('punImporte').value);
       const fecha = $('punFecha').value;
       if (!concepto || isNaN(importe) || !fecha) return;
 
-      await postAction({ action: 'addManualExpense', concepto, importe, fecha });
+      const id = 'GAS-' + Date.now();
+      const mes = fecha.substring(0, 7);
+
+      if (mes === $('monthPicker').value) {
+        state.puntuales.unshift({ id, fecha, concepto, categoria: selectedTag, importe });
+        state.puntuales.sort((a, b) => b.fecha.localeCompare(a.fecha));
+        renderAll();
+      }
+
       $('punConcepto').value = '';
       $('punImporte').value = '';
-      showToast('Gasto puntual guardado');
-      loadData();
+      showToast('Gasto guardado');
+
+      syncBackground({
+        action: 'addManualExpense',
+        id,
+        concepto,
+        importe,
+        fecha,
+        categoria: selectedTag
+      });
     });
 
-    // Guardar Gasto Fijo
-    $('formFijo').addEventListener('submit', async (e) => {
+    // Guardar Gasto Fijo (Optimistic UI)
+    $('formFijo').addEventListener('submit', (e) => {
       e.preventDefault();
       const concepto = $('fixConcepto').value.trim();
       const importe = parseFloat($('fixImporte').value);
       const categoria = $('fixCategoria').value;
       if (!concepto || isNaN(importe)) return;
 
-      await postAction({ action: 'addFixed', concepto, importe, categoria });
+      const id = 'FIX-' + Date.now();
+      state.fijos.push({ id, concepto, categoria, importeBase: importe, importe, pagado: false });
+      renderAll();
+
       $('fixConcepto').value = '';
       $('fixImporte').value = '';
-      showToast('Gasto fijo guardado');
-      loadData();
+      showToast('Gasto fijo añadido');
+
+      syncBackground({ action: 'addFixed', id, concepto, importe, categoria });
+    });
+
+    // Modal Editar Puntual
+    $('closeEditPun').addEventListener('click', () => $('editPuntualModal').classList.add('hidden'));
+    $('btnSavePunModal').addEventListener('click', () => {
+      const id = $('editPunId').value;
+      const concepto = $('editPunConcepto').value.trim();
+      const importe = parseFloat($('editPunImporte').value);
+      const fecha = $('editPunFecha').value;
+      const categoria = $('editPunCategoria').value;
+      if (!concepto || isNaN(importe) || !fecha) return;
+
+      const idx = state.puntuales.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        if (fecha.substring(0, 7) !== $('monthPicker').value) {
+          state.puntuales.splice(idx, 1);
+        } else {
+          state.puntuales[idx] = { id, concepto, importe, fecha, categoria };
+          state.puntuales.sort((a, b) => b.fecha.localeCompare(a.fecha));
+        }
+        renderAll();
+      }
+
+      $('editPuntualModal').classList.add('hidden');
+      showToast('Cambios guardados');
+      syncBackground({ action: 'editExpense', id, concepto, importe, fecha, categoria });
+    });
+
+    $('btnDelPunModal').addEventListener('click', () => {
+      const id = $('editPunId').value;
+      state.puntuales = state.puntuales.filter(x => x.id !== id);
+      renderAll();
+      $('editPuntualModal').classList.add('hidden');
+      showToast('Gasto eliminado');
+      syncBackground({ action: 'deleteExpense', id });
+    });
+
+    // Modal Editar Fijo
+    $('closeEditFix').addEventListener('click', () => $('editFijoModal').classList.add('hidden'));
+    $('btnSaveFixModal').addEventListener('click', () => {
+      const id = $('editFixId').value;
+      const concepto = $('editFixConcepto').value.trim();
+      const importe = parseFloat($('editFixImporte').value);
+      const categoria = $('editFixCategoria').value;
+      const actualizarBase = $('editFixUpdateBase').checked;
+      if (!concepto || isNaN(importe)) return;
+
+      const item = state.fijos.find(x => x.id === id);
+      if (item) {
+        item.concepto = concepto;
+        item.categoria = categoria;
+        item.importe = importe;
+        if (actualizarBase) item.importeBase = importe;
+        renderAll();
+      }
+
+      $('editFijoModal').classList.add('hidden');
+      showToast('Recibo actualizado');
+      syncBackground({
+        action: 'editFixed',
+        id,
+        concepto,
+        categoria,
+        importe,
+        actualizarBase,
+        month: $('monthPicker').value
+      });
+    });
+
+    $('btnDelFixModal').addEventListener('click', () => {
+      const id = $('editFixId').value;
+      state.fijos = state.fijos.filter(x => x.id !== id);
+      renderAll();
+      $('editFijoModal').classList.add('hidden');
+      showToast('Recibo eliminado');
+      syncBackground({ action: 'deleteFixed', id });
     });
   }
 
   async function loadData() {
-    setSync('Cargando...');
+    setSync('Cargando...', true);
     try {
       const month = $('monthPicker').value;
       const res = await fetch(`${API_URL}?month=${encodeURIComponent(month)}`);
@@ -648,15 +1111,15 @@
       if (!data.ok) throw new Error(data.error || 'Error de lectura');
       state = data;
       renderAll();
-      setSync('Al día');
+      setSync('Al día', false);
     } catch (err) {
-      setSync('Error');
-      showToast('Error al cargar datos');
+      setSync('Sin conexión', false);
+      showToast('No se pudieron cargar los datos');
     }
   }
 
-  async function postAction(payload) {
-    setSync('Guardando...');
+  async function syncBackground(payload) {
+    setSync('Guardando...', true);
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -664,12 +1127,12 @@
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Error al guardar');
-      return data;
+      if (!data.ok) throw new Error(data.error || 'Error en servidor');
+      setSync('Al día', false);
     } catch (err) {
-      setSync('Error');
-      showToast('Error: ' + err.message);
-      throw err;
+      setSync('Error sync', false);
+      showToast('Error al sincronizar. Recargando...');
+      loadData();
     }
   }
 
@@ -684,41 +1147,76 @@
     $('subPuntuales').textContent = `${state.puntuales.length} ${state.puntuales.length === 1 ? 'apunte' : 'apuntes'}`;
     $('totalMes').textContent = formatEuro(totalFijos + totalPuntuales);
 
+    // Barra de presupuesto
+    const pct = Math.min(100, Math.round((totalPuntuales / monthlyBudget) * 100));
+    $('budgetText').textContent = `${Math.round(totalPuntuales)} € / ${monthlyBudget} €`;
+    $('budgetFill').style.width = `${pct}%`;
+    $('budgetFill').style.backgroundColor = pct >= 100 ? 'var(--danger)' : (pct >= 80 ? 'var(--var)' : 'var(--paid)');
+
+    renderQuickChips();
     renderPuntuales();
     renderFijos();
   }
 
+  function renderQuickChips() {
+    const counts = {};
+    state.puntuales.forEach(p => {
+      const key = p.concepto.trim();
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const top = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(e => e[0]);
+
+    const defaults = ['Mercadona', 'Lidl', 'Farmacia', 'Café'];
+    defaults.forEach(d => {
+      if (top.length < 5 && !top.some(x => x.toLowerCase() === d.toLowerCase())) {
+        top.push(d);
+      }
+    });
+
+    const box = $('quickChips');
+    box.innerHTML = top.map(name => `<button type="button" class="chip" data-chip="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('');
+
+    box.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $('punConcepto').value = btn.dataset.chip;
+        $('punImporte').focus();
+      });
+    });
+  }
+
   function renderPuntuales() {
     const list = $('listPuntuales');
-    if (state.puntuales.length === 0) {
-      list.innerHTML = '<div class="empty-msg">Sin gastos puntuales en este mes.</div>';
+    const items = activeFilter === 'Todos'
+      ? state.puntuales
+      : state.puntuales.filter(p => p.categoria === activeFilter);
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="empty-msg">Sin gastos puntuales en esta vista.</div>';
       return;
     }
 
     list.innerHTML = '';
-    state.puntuales.forEach(item => {
+    items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'expense-row variable-row';
       el.innerHTML = `
         <div class="row-main">
           <div class="row-title">${escapeHtml(item.concepto)}</div>
-          <div class="row-sub">${formatShortDate(item.fecha)}</div>
+          <div class="row-sub">
+            <span class="pill pill-var">${escapeHtml(item.categoria)}</span>
+            <span>${formatShortDate(item.fecha)}</span>
+          </div>
         </div>
         <div class="row-right">
           <span class="row-amount">${formatEuro(item.importe)}</span>
-          <button type="button" class="del-btn" data-delpun="${item.id}" aria-label="Borrar">✕</button>
         </div>
       `;
+      el.addEventListener('click', () => openEditPuntual(item));
       list.appendChild(el);
-    });
-
-    list.querySelectorAll('[data-delpun]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('¿Borrar este gasto puntual?')) return;
-        await postAction({ action: 'deleteExpense', id: btn.dataset.delpun });
-        showToast('Gasto eliminado');
-        loadData();
-      });
     });
   }
 
@@ -742,38 +1240,52 @@
         </div>
         <div class="row-right">
           <span class="row-amount">${formatEuro(item.importe)}</span>
-          <button type="button" class="status-btn ${item.pagado ? 'is-paid' : ''}" data-toggle="${item.id}">
+          <button type="button" class="status-btn ${item.pagado ? 'is-paid' : ''}">
             ${item.pagado ? 'Pagado' : 'Pendiente'}
           </button>
-          <button type="button" class="del-btn" data-delfix="${item.id}" aria-label="Borrar">✕</button>
         </div>
       `;
-      list.appendChild(el);
-    });
 
-    list.querySelectorAll('[data-toggle]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.toggle;
-        const item = state.fijos.find(x => x.id === id);
-        if (!item) return;
-        await postAction({
+      // Tocar la fila abre edición (útil para ajustar importe variable como la Luz)
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('.status-btn')) return;
+        openEditFijo(item);
+      });
+
+      // Tocar el botón Pagado/Pendiente alterna estado al instante
+      el.querySelector('.status-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        item.pagado = !item.pagado;
+        renderAll();
+        syncBackground({
           action: 'toggleFixedPaid',
-          id: id,
-          pagado: !item.pagado,
+          id: item.id,
+          pagado: item.pagado,
+          importe: item.importe,
           month: $('monthPicker').value
         });
-        loadData();
       });
-    });
 
-    list.querySelectorAll('[data-delfix]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('¿Eliminar este gasto fijo mensual?')) return;
-        await postAction({ action: 'deleteFixed', id: btn.dataset.delfix });
-        showToast('Gasto fijo eliminado');
-        loadData();
-      });
+      list.appendChild(el);
     });
+  }
+
+  function openEditPuntual(item) {
+    $('editPunId').value = item.id;
+    $('editPunConcepto').value = item.concepto;
+    $('editPunImporte').value = item.importe;
+    $('editPunFecha').value = item.fecha;
+    $('editPunCategoria').value = ['Súper', 'Mascotas', 'Ocio', 'Varios'].includes(item.categoria) ? item.categoria : 'Varios';
+    $('editPuntualModal').classList.remove('hidden');
+  }
+
+  function openEditFijo(item) {
+    $('editFixId').value = item.id;
+    $('editFixConcepto').value = item.concepto;
+    $('editFixImporte').value = item.importe;
+    $('editFixCategoria').value = item.categoria;
+    $('editFixUpdateBase').checked = item.categoria !== 'Luz';
+    $('editFijoModal').classList.remove('hidden');
   }
 
   function formatEuro(num) {
@@ -783,7 +1295,7 @@
   function formatShortDate(iso) {
     const parts = String(iso).split('-');
     if (parts.length !== 3) return iso;
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return `${parts[2]}/${parts[1]}`;
   }
 
   function escapeHtml(str) {
@@ -792,8 +1304,10 @@
     }[m]));
   }
 
-  function setSync(text) {
-    $('syncStatus').textContent = text;
+  function setSync(text, syncing) {
+    const el = $('syncStatus');
+    el.textContent = text;
+    el.classList.toggle('syncing', syncing);
   }
 
   function showToast(msg) {
@@ -801,7 +1315,7 @@
     t.textContent = msg;
     t.classList.remove('hidden');
     clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.add('hidden'), 2600);
+    t._timer = setTimeout(() => t.classList.add('hidden'), 2400);
   }
 </script>
 </body>
