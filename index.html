@@ -212,6 +212,11 @@
       padding: 11px 14px;
       margin-bottom: 16px;
       cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .budget-bar-card:active {
+      background: var(--surface-elevated);
     }
 
     .budget-top {
@@ -362,21 +367,21 @@
 
     .input:focus { border-color: var(--text); }
 
-    /* Selector de Subcategoría Puntual */
+    /* Selector de Subcategoría Puntual (3 columnas: Súper, Ocio, Varios) */
     .tag-selector {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
       margin-bottom: 14px;
     }
 
     .tag-btn {
-      height: 36px;
+      height: 38px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--surface-elevated);
       color: var(--text-muted);
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -427,9 +432,9 @@
     .filter-pills::-webkit-scrollbar { display: none; }
 
     .f-pill {
-      padding: 4px 9px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 600;
       border: 1px solid var(--border);
       background: var(--surface);
@@ -545,7 +550,7 @@
 
     .hidden { display: none !important; }
 
-    /* Bottom Sheet Modal estilo iOS para editar */
+    /* Bottom Sheet Modal estilo iOS */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -563,6 +568,14 @@
       border-top: 1px solid var(--border);
       border-radius: 22px 22px 0 0;
       padding: 18px 18px max(26px, env(safe-area-inset-bottom));
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      margin: 0 auto 14px;
     }
 
     .sheet-header {
@@ -604,6 +617,31 @@
       font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
+    }
+
+    /* Botones de ajuste rápido dentro del sheet de presupuesto */
+    .budget-stepper {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .step-btn {
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .step-btn:active {
+      background: var(--var-soft);
+      border-color: var(--var);
     }
 
     .checkbox-row {
@@ -668,10 +706,10 @@
     </div>
   </section>
 
-  <!-- Barra de Presupuesto Puntuales (tocar para editar tope) -->
-  <section class="budget-bar-card" id="budgetCard" title="Toca para ajustar presupuesto">
+  <!-- Barra de Presupuesto Puntuales (tocar para abrir sheet) -->
+  <section class="budget-bar-card" id="budgetCard">
     <div class="budget-top">
-      <span class="budget-label">Presupuesto puntuales (tocar para ajustar)</span>
+      <span class="budget-label">Presupuesto puntuales</span>
       <span class="budget-numbers" id="budgetText">0 € / 400 €</span>
     </div>
     <div class="progress-track">
@@ -714,7 +752,6 @@
       <label class="field-label">Etiqueta</label>
       <div class="tag-selector" id="punTags">
         <button type="button" class="tag-btn selected" data-tag="Súper">Súper</button>
-        <button type="button" class="tag-btn" data-tag="Mascotas">Mascotas</button>
         <button type="button" class="tag-btn" data-tag="Ocio">Ocio</button>
         <button type="button" class="tag-btn" data-tag="Varios">Varios</button>
       </div>
@@ -727,7 +764,6 @@
       <div class="filter-pills" id="filterPills">
         <button type="button" class="f-pill active" data-filter="Todos">Todos</button>
         <button type="button" class="f-pill" data-filter="Súper">Súper</button>
-        <button type="button" class="f-pill" data-filter="Mascotas">Mascotas</button>
         <button type="button" class="f-pill" data-filter="Ocio">Ocio</button>
         <button type="button" class="f-pill" data-filter="Varios">Varios</button>
       </div>
@@ -772,9 +808,30 @@
   </section>
 </main>
 
+<!-- Bottom Sheet: Ajustar Presupuesto Mensual -->
+<div id="budgetModal" class="sheet-backdrop hidden">
+  <div class="sheet-card">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">Presupuesto mensual puntuales</span>
+      <button type="button" class="sheet-close" id="closeBudgetModal">✕</button>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="budgetInput">Tope orientativo (€)</label>
+      <div class="budget-stepper">
+        <button type="button" class="step-btn" id="budgetMinus">-50 €</button>
+        <input class="input" type="number" inputmode="decimal" step="10" min="10" id="budgetInput" style="text-align:center; font-weight:700;" />
+        <button type="button" class="step-btn" id="budgetPlus">+50 €</button>
+      </div>
+    </div>
+    <button type="button" class="btn-submit btn-variable" id="btnSaveBudget">Guardar presupuesto</button>
+  </div>
+</div>
+
 <!-- Bottom Sheet: Editar Gasto Puntual -->
 <div id="editPuntualModal" class="sheet-backdrop hidden">
   <div class="sheet-card">
+    <div class="sheet-handle"></div>
     <div class="sheet-header">
       <span class="sheet-title">Editar gasto puntual</span>
       <button type="button" class="sheet-close" id="closeEditPun">✕</button>
@@ -798,7 +855,6 @@
       <label class="field-label">Etiqueta</label>
       <select class="input" id="editPunCategoria">
         <option value="Súper">Súper</option>
-        <option value="Mascotas">Mascotas</option>
         <option value="Ocio">Ocio</option>
         <option value="Varios">Varios</option>
       </select>
@@ -810,9 +866,10 @@
   </div>
 </div>
 
-<!-- Bottom Sheet: Editar Gasto Fijo (permite cambiar importe solo este mes, ej. Luz) -->
+<!-- Bottom Sheet: Editar Gasto Fijo -->
 <div id="editFijoModal" class="sheet-backdrop hidden">
   <div class="sheet-card">
+    <div class="sheet-handle"></div>
     <div class="sheet-header">
       <span class="sheet-title">Editar recibo fijo</span>
       <button type="button" class="sheet-close" id="closeEditFix">✕</button>
@@ -875,7 +932,6 @@
     loadData();
   });
 
-  // Genera un icono limpio de app para Pantalla de Inicio en iPhone
   function generateAppIcon() {
     try {
       const canvas = document.createElement('canvas');
@@ -900,7 +956,6 @@
     } catch (e) {}
   }
 
-  // Soporte para Atajos de iOS / Apple Pay (?concepto=...&importe=...)
   function handleUrlShortcuts() {
     const params = new URLSearchParams(window.location.search);
     const concepto = params.get('concepto');
@@ -912,7 +967,7 @@
       if (concepto) $('punConcepto').value = concepto;
       if (importe) $('punImporte').value = parseFloat(importe.replace(',', '.')) || '';
       if (fecha) $('punFecha').value = fecha;
-      if (categoria) {
+      if (categoria && ['Súper', 'Ocio', 'Varios'].includes(categoria)) {
         selectedTag = categoria;
         document.querySelectorAll('#punTags .tag-btn').forEach(b => {
           b.classList.toggle('selected', b.dataset.tag === categoria);
@@ -944,15 +999,35 @@
     $('monthPicker').addEventListener('change', loadData);
     $('btnRefresh').addEventListener('click', loadData);
 
-    // Configurar presupuesto mensual al tocar la barra
+    // Cerrar modales al tocar fuera de la tarjeta
+    document.querySelectorAll('.sheet-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) backdrop.classList.add('hidden');
+      });
+    });
+
+    // Bottom Sheet Presupuesto Mensual
     $('budgetCard').addEventListener('click', () => {
-      const nuevo = prompt('Presupuesto mensual para gastos puntuales (€):', monthlyBudget);
-      if (nuevo === null) return;
-      const val = parseFloat(nuevo.replace(',', '.'));
+      $('budgetInput').value = monthlyBudget;
+      $('budgetModal').classList.remove('hidden');
+    });
+    $('closeBudgetModal').addEventListener('click', () => $('budgetModal').classList.add('hidden'));
+    $('budgetMinus').addEventListener('click', () => {
+      const curr = parseFloat($('budgetInput').value) || monthlyBudget;
+      $('budgetInput').value = Math.max(10, curr - 50);
+    });
+    $('budgetPlus').addEventListener('click', () => {
+      const curr = parseFloat($('budgetInput').value) || monthlyBudget;
+      $('budgetInput').value = curr + 50;
+    });
+    $('btnSaveBudget').addEventListener('click', () => {
+      const val = parseFloat(String($('budgetInput').value).replace(',', '.'));
       if (!isNaN(val) && val > 0) {
         monthlyBudget = val;
         localStorage.setItem('gastos_budget', String(val));
         renderAll();
+        $('budgetModal').classList.add('hidden');
+        showToast('Presupuesto actualizado');
       }
     });
 
@@ -1246,13 +1321,11 @@
         </div>
       `;
 
-      // Tocar la fila abre edición (útil para ajustar importe variable como la Luz)
       el.addEventListener('click', (e) => {
         if (e.target.closest('.status-btn')) return;
         openEditFijo(item);
       });
 
-      // Tocar el botón Pagado/Pendiente alterna estado al instante
       el.querySelector('.status-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         item.pagado = !item.pagado;
@@ -1275,7 +1348,7 @@
     $('editPunConcepto').value = item.concepto;
     $('editPunImporte').value = item.importe;
     $('editPunFecha').value = item.fecha;
-    $('editPunCategoria').value = ['Súper', 'Mascotas', 'Ocio', 'Varios'].includes(item.categoria) ? item.categoria : 'Varios';
+    $('editPunCategoria').value = ['Súper', 'Ocio', 'Varios'].includes(item.categoria) ? item.categoria : 'Varios';
     $('editPuntualModal').classList.remove('hidden');
   }
 
