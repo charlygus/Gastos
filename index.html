@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Gastos" />
-  <link id="appleIcon" rel="apple-touch-icon" href="" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230b0f19'/%3E%3Ccircle cx='90' cy='90' r='62' fill='%23f59e0b'/%3E%3Ctext x='90' y='115' font-family='-apple-system,sans-serif' font-size='78' font-weight='bold' fill='%230b0f19' text-anchor='middle'%3E%E2%82%AC%3C/text%3E%3C/svg%3E" />
   <title>Mis Gastos</title>
   <style>
     :root {
@@ -104,6 +104,10 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+    }
+
+    .btn-refresh:active {
+      background: var(--surface-elevated);
     }
 
     /* Total General */
@@ -350,7 +354,7 @@
 
     .tag-btn {
       flex: 1 1 auto;
-      min-width: 64px;
+      min-width: 62px;
       height: 38px;
       padding: 0 10px;
       border-radius: 10px;
@@ -524,7 +528,7 @@
 
     .hidden { display: none !important; }
 
-    /* Bottom Sheet Modal estilo iOS */
+    /* Bottom Sheet Modal estilo iOS con scroll seguro frente al teclado */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -538,10 +542,12 @@
     .sheet-card {
       width: 100%;
       max-width: 430px;
+      max-height: 88dvh;
+      overflow-y: auto;
       background: var(--surface);
       border-top: 1px solid var(--border);
       border-radius: 22px 22px 0 0;
-      padding: 18px 18px max(26px, env(safe-area-inset-bottom));
+      padding: 16px 18px max(26px, env(safe-area-inset-bottom));
     }
 
     .sheet-handle {
@@ -589,8 +595,15 @@
       background: rgba(239, 68, 68, 0.12);
       color: var(--danger);
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .btn-delete-sheet.armed {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
     }
 
     .budget-stepper {
@@ -619,11 +632,19 @@
 
     .checkbox-row {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       font-size: 0.82rem;
       color: var(--text-muted);
       margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      margin-top: 2px;
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
     }
 
     .toast {
@@ -873,27 +894,36 @@
   let selectedTag = CATEGORIAS_PUNTUALES[0];
   let activeFilter = 'Todos';
   let monthlyBudget = Number(localStorage.getItem('gastos_budget')) || 400;
+  let syncQueue = Promise.resolve();
+  let pendingSyncCount = 0;
 
   const $ = (id) => document.getElementById(id);
 
-  document.addEventListener('DOMContentLoaded', () => {
-    generateAppIcon();
-    renderCategoryControls();
-
+  function getTodayISO() {
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
 
-    $('monthPicker').value = `${yyyy}-${mm}`;
-    $('punFecha').value = `${yyyy}-${mm}-${dd}`;
+  function parseDecimal(val) {
+    const num = parseFloat(String(val || '').replace(',', '.'));
+    return isNaN(num) ? NaN : Math.round(num * 100) / 100;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCategoryControls();
+
+    const today = getTodayISO();
+    $('monthPicker').value = today.substring(0, 7);
+    $('punFecha').value = today;
 
     bindEvents();
     handleUrlShortcuts();
     loadData();
   });
 
-  // Rellena con exactamente las mismas categorías el formulario, el filtro y el modal de edición
   function renderCategoryControls() {
     $('punTags').innerHTML = CATEGORIAS_PUNTUALES.map((cat, idx) =>
       `<button type="button" class="tag-btn ${idx === 0 ? 'selected' : ''}" data-tag="${cat}">${cat}</button>`
@@ -908,30 +938,6 @@
     ).join('');
   }
 
-  function generateAppIcon() {
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 180;
-      canvas.height = 180;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#0b0f19';
-      ctx.fillRect(0, 0, 180, 180);
-
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(90, 90, 62, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#0b0f19';
-      ctx.font = 'bold 76px -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('€', 90, 95);
-
-      $('appleIcon').href = canvas.toDataURL('image/png');
-    } catch (e) {}
-  }
-
   function handleUrlShortcuts() {
     const params = new URLSearchParams(window.location.search);
     const concepto = params.get('concepto');
@@ -941,8 +947,14 @@
 
     if (concepto || importe) {
       if (concepto) $('punConcepto').value = concepto;
-      if (importe) $('punImporte').value = parseFloat(importe.replace(',', '.')) || '';
-      if (fecha) $('punFecha').value = fecha;
+      if (importe) {
+        const parsed = parseDecimal(importe);
+        $('punImporte').value = !isNaN(parsed) ? parsed : '';
+      }
+      if (fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+        $('punFecha').value = fecha;
+        $('monthPicker').value = fecha.substring(0, 7);
+      }
       if (categoria && CATEGORIAS_PUNTUALES.includes(categoria)) {
         selectedTag = categoria;
         document.querySelectorAll('#punTags .tag-btn').forEach(b => {
@@ -972,13 +984,34 @@
       $('viewPuntuales').classList.add('hidden');
     });
 
-    $('monthPicker').addEventListener('change', loadData);
+    // Sincronizar fecha del formulario al cambiar de mes
+    $('monthPicker').addEventListener('change', () => {
+      const selectedMonth = $('monthPicker').value;
+      const today = getTodayISO();
+      if (selectedMonth === today.substring(0, 7)) {
+        $('punFecha').value = today;
+      } else if (selectedMonth && !$('punFecha').value.startsWith(selectedMonth)) {
+        $('punFecha').value = `${selectedMonth}-01`;
+      }
+      loadData();
+    });
+
     $('btnRefresh').addEventListener('click', loadData);
 
-    // Cerrar modales al tocar fuera de la tarjeta
+    // Cerrar modales al tocar fuera de la tarjeta y resetear confirmación de borrado
     document.querySelectorAll('.sheet-backdrop').forEach(backdrop => {
       backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) backdrop.classList.add('hidden');
+        if (e.target === backdrop) {
+          backdrop.classList.add('hidden');
+          resetDeleteButtons();
+        }
+      });
+    });
+
+    // Auto-scroll en inputs dentro de modales para que el teclado iOS no tape botones
+    document.querySelectorAll('.sheet-card .input').forEach(inp => {
+      inp.addEventListener('focus', () => {
+        setTimeout(() => inp.scrollIntoView({ behavior: 'smooth', block: 'center' }), 260);
       });
     });
 
@@ -989,15 +1022,15 @@
     });
     $('closeBudgetModal').addEventListener('click', () => $('budgetModal').classList.add('hidden'));
     $('budgetMinus').addEventListener('click', () => {
-      const curr = parseFloat($('budgetInput').value) || monthlyBudget;
+      const curr = parseDecimal($('budgetInput').value) || monthlyBudget;
       $('budgetInput').value = Math.max(10, curr - 50);
     });
     $('budgetPlus').addEventListener('click', () => {
-      const curr = parseFloat($('budgetInput').value) || monthlyBudget;
+      const curr = parseDecimal($('budgetInput').value) || monthlyBudget;
       $('budgetInput').value = curr + 50;
     });
     $('btnSaveBudget').addEventListener('click', () => {
-      const val = parseFloat(String($('budgetInput').value).replace(',', '.'));
+      const val = parseDecimal($('budgetInput').value);
       if (!isNaN(val) && val > 0) {
         monthlyBudget = val;
         localStorage.setItem('gastos_budget', String(val));
@@ -1026,13 +1059,13 @@
       });
     });
 
-    // Guardar Gasto Puntual (Optimistic UI)
+    // Guardar Gasto Puntual (Optimistic UI + cola secuencial)
     $('formPuntual').addEventListener('submit', (e) => {
       e.preventDefault();
       const concepto = $('punConcepto').value.trim();
-      const importe = parseFloat($('punImporte').value);
+      const importe = parseDecimal($('punImporte').value);
       const fecha = $('punFecha').value;
-      if (!concepto || isNaN(importe) || !fecha) return;
+      if (!concepto || isNaN(importe) || importe <= 0 || !fecha) return;
 
       const id = 'GAS-' + Date.now();
       const mes = fecha.substring(0, 7);
@@ -1041,13 +1074,16 @@
         state.puntuales.unshift({ id, fecha, concepto, categoria: selectedTag, importe });
         state.puntuales.sort((a, b) => b.fecha.localeCompare(a.fecha));
         renderAll();
+      } else {
+        $('monthPicker').value = mes;
+        loadData();
       }
 
       $('punConcepto').value = '';
       $('punImporte').value = '';
       showToast('Gasto guardado');
 
-      syncBackground({
+      enqueueSync({
         action: 'addManualExpense',
         id,
         concepto,
@@ -1057,13 +1093,13 @@
       });
     });
 
-    // Guardar Gasto Fijo (Optimistic UI)
+    // Guardar Gasto Fijo (Optimistic UI + cola secuencial)
     $('formFijo').addEventListener('submit', (e) => {
       e.preventDefault();
       const concepto = $('fixConcepto').value.trim();
-      const importe = parseFloat($('fixImporte').value);
+      const importe = parseDecimal($('fixImporte').value);
       const categoria = $('fixCategoria').value;
-      if (!concepto || isNaN(importe)) return;
+      if (!concepto || isNaN(importe) || importe <= 0) return;
 
       const id = 'FIX-' + Date.now();
       state.fijos.push({ id, concepto, categoria, importeBase: importe, importe, pagado: false });
@@ -1073,18 +1109,22 @@
       $('fixImporte').value = '';
       showToast('Gasto fijo añadido');
 
-      syncBackground({ action: 'addFixed', id, concepto, importe, categoria });
+      enqueueSync({ action: 'addFixed', id, concepto, importe, categoria });
     });
 
     // Modal Editar Puntual
-    $('closeEditPun').addEventListener('click', () => $('editPuntualModal').classList.add('hidden'));
+    $('closeEditPun').addEventListener('click', () => {
+      $('editPuntualModal').classList.add('hidden');
+      resetDeleteButtons();
+    });
+
     $('btnSavePunModal').addEventListener('click', () => {
       const id = $('editPunId').value;
       const concepto = $('editPunConcepto').value.trim();
-      const importe = parseFloat($('editPunImporte').value);
+      const importe = parseDecimal($('editPunImporte').value);
       const fecha = $('editPunFecha').value;
       const categoria = $('editPunCategoria').value;
-      if (!concepto || isNaN(importe) || !fecha) return;
+      if (!concepto || isNaN(importe) || importe <= 0 || !fecha) return;
 
       const idx = state.puntuales.findIndex(x => x.id === id);
       if (idx !== -1) {
@@ -1098,28 +1138,40 @@
       }
 
       $('editPuntualModal').classList.add('hidden');
+      resetDeleteButtons();
       showToast('Cambios guardados');
-      syncBackground({ action: 'editExpense', id, concepto, importe, fecha, categoria });
+      enqueueSync({ action: 'editExpense', id, concepto, importe, fecha, categoria });
     });
 
     $('btnDelPunModal').addEventListener('click', () => {
+      const btn = $('btnDelPunModal');
+      if (!btn.classList.contains('armed')) {
+        btn.classList.add('armed');
+        btn.textContent = '¿Confirmar?';
+        return;
+      }
       const id = $('editPunId').value;
       state.puntuales = state.puntuales.filter(x => x.id !== id);
       renderAll();
       $('editPuntualModal').classList.add('hidden');
+      resetDeleteButtons();
       showToast('Gasto eliminado');
-      syncBackground({ action: 'deleteExpense', id });
+      enqueueSync({ action: 'deleteExpense', id });
     });
 
     // Modal Editar Fijo
-    $('closeEditFix').addEventListener('click', () => $('editFijoModal').classList.add('hidden'));
+    $('closeEditFix').addEventListener('click', () => {
+      $('editFijoModal').classList.add('hidden');
+      resetDeleteButtons();
+    });
+
     $('btnSaveFixModal').addEventListener('click', () => {
       const id = $('editFixId').value;
       const concepto = $('editFixConcepto').value.trim();
-      const importe = parseFloat($('editFixImporte').value);
+      const importe = parseDecimal($('editFixImporte').value);
       const categoria = $('editFixCategoria').value;
       const actualizarBase = $('editFixUpdateBase').checked;
-      if (!concepto || isNaN(importe)) return;
+      if (!concepto || isNaN(importe) || importe <= 0) return;
 
       const item = state.fijos.find(x => x.id === id);
       if (item) {
@@ -1131,8 +1183,9 @@
       }
 
       $('editFijoModal').classList.add('hidden');
+      resetDeleteButtons();
       showToast('Recibo actualizado');
-      syncBackground({
+      enqueueSync({
         action: 'editFixed',
         id,
         concepto,
@@ -1144,12 +1197,29 @@
     });
 
     $('btnDelFixModal').addEventListener('click', () => {
+      const btn = $('btnDelFixModal');
+      if (!btn.classList.contains('armed')) {
+        btn.classList.add('armed');
+        btn.textContent = '¿Confirmar?';
+        return;
+      }
       const id = $('editFixId').value;
       state.fijos = state.fijos.filter(x => x.id !== id);
       renderAll();
       $('editFijoModal').classList.add('hidden');
+      resetDeleteButtons();
       showToast('Recibo eliminado');
-      syncBackground({ action: 'deleteFixed', id });
+      enqueueSync({ action: 'deleteFixed', id });
+    });
+  }
+
+  function resetDeleteButtons() {
+    ['btnDelPunModal', 'btnDelFixModal'].forEach(id => {
+      const b = $(id);
+      if (b) {
+        b.classList.remove('armed');
+        b.textContent = 'Borrar';
+      }
     });
   }
 
@@ -1162,29 +1232,36 @@
       if (!data.ok) throw new Error(data.error || 'Error de lectura');
       state = data;
       renderAll();
-      setSync('Al día', false);
+      setSync(pendingSyncCount > 0 ? 'Guardando...' : 'Al día', pendingSyncCount > 0);
     } catch (err) {
       setSync('Sin conexión', false);
       showToast('No se pudieron cargar los datos');
     }
   }
 
-  async function syncBackground(payload) {
+  function enqueueSync(payload) {
+    pendingSyncCount++;
     setSync('Guardando...', true);
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Error en servidor');
-      setSync('Al día', false);
-    } catch (err) {
-      setSync('Error sync', false);
-      showToast('Error al sincronizar. Recargando...');
-      loadData();
-    }
+
+    syncQueue = syncQueue.then(async () => {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'Error en servidor');
+      } catch (err) {
+        showToast('Error al sincronizar. Recargando...');
+        await loadData();
+      } finally {
+        pendingSyncCount = Math.max(0, pendingSyncCount - 1);
+        if (pendingSyncCount === 0) {
+          setSync('Al día', false);
+        }
+      }
+    });
   }
 
   function renderAll() {
@@ -1275,7 +1352,7 @@
         e.stopPropagation();
         item.pagado = !item.pagado;
         renderAll();
-        syncBackground({
+        enqueueSync({
           action: 'toggleFixedPaid',
           id: item.id,
           pagado: item.pagado,
@@ -1289,6 +1366,7 @@
   }
 
   function openEditPuntual(item) {
+    resetDeleteButtons();
     $('editPunId').value = item.id;
     $('editPunConcepto').value = item.concepto;
     $('editPunImporte').value = item.importe;
@@ -1298,6 +1376,7 @@
   }
 
   function openEditFijo(item) {
+    resetDeleteButtons();
     $('editFixId').value = item.id;
     $('editFixConcepto').value = item.concepto;
     $('editFixImporte').value = item.importe;
